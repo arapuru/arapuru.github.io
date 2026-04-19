@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YTImport — YouTube Playlist to Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #252525;
+    --border2: #333;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --muted2: #999;
+    --red: #ff4545;
+    --green: #47ff8a;
+    --radius: 12px;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-head);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND GRID ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon svg { width: 18px; height: 18px; }
+
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .header-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 10;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding: 5px 14px;
+    border: 1px solid rgba(232, 255, 71, 0.3);
+    border-radius: 20px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  h1 {
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted2);
+    font-weight: 400;
+    max-width: 480px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+    font-family: var(--font-mono);
+  }
+
+  /* ── GENERATOR CARD ── */
+  .generator {
+    position: relative;
+    z-index: 10;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 32px;
+  }
+
+  .field { margin-bottom: 20px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--muted2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--accent);
+  }
+
+  input::placeholder { color: var(--muted); }
+
+  .input-icon {
+    position: absolute;
+    right: 14px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: var(--font-mono);
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  /* ── COURSE OPTIONS ── */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .option-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--muted2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .option-btn:hover { border-color: var(--accent); color: var(--text); }
+  .option-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,255,71,0.06); }
+
+  .option-btn .opt-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+
+  /* ── GENERATE BUTTON ── */
+  .generate-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 32px;
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: -0.3px;
+  }
+
+  .generate-btn:hover { background: #d4eb3a; transform: translateY(-1px); }
+  .generate-btn:active { transform: translateY(0); }
+  .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .generate-btn .btn-icon { transition: transform 0.3s; }
+  .generate-btn:hover .btn-icon { transform: translateX(4px); }
+
+  /* ── STATUS / PROGRESS ── */
+  #status-area {
+    margin-top: 20px;
+    display: none;
+  }
+
+  .status-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted2);
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-dot.spin {
+    border: 2px solid var(--accent);
+    border-top-color: transparent;
+    animation: spin 0.7s linear infinite;
+    background: transparent;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status-dot.done { background: var(--green); }
+  .status-dot.err  { background: var(--red); }
+
+  /* ── ERROR ── */
+  .error-box {
+    background: rgba(255,69,69,0.08);
+    border: 1px solid rgba(255,69,69,0.3);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #ff8080;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ── RESULT ── */
+  #result-area {
+    display: none;
+    margin-top: 24px;
+    background: rgba(71, 255, 138, 0.05);
+    border: 1px solid rgba(71, 255, 138, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .result-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .download-btn {
+    flex: 1;
+    background: var(--green);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .download-btn:hover { background: #3ae87a; }
+
+  .preview-btn {
+    flex: 1;
+    background: transparent;
+    color: var(--green);
+    border: 1px solid rgba(71,255,138,0.3);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .preview-btn:hover { background: rgba(71,255,138,0.08); }
+
+  /* ── INFO STRIP ── */
+  .info-strip {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+
+  .info-pill {
+    padding: 3px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    position: relative;
+    z-index: 10;
+    max-width: 700px;
+    margin: 0 auto 80px;
+    padding: 0 40px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .hero, .generator, .how { padding-left: 20px; padding-right: 20px; }
+    h1 { font-size: 36px; }
+    .field-row { grid-template-columns: 1fr; }
+    .options-grid { grid-template-columns: repeat(3, 1fr); }
+    .steps { grid-template-columns: 1fr; }
+    .result-actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 3 19 12 5 21 5 3"/>
+      </svg>
+    </div>
+    <div class="logo-text">YT<span>Import</span></div>
+  </div>
+  <div class="header-badge">v1.0 · free · no backend</div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">YouTube → Course Generator</div>
+  <h1>Turn any playlist into a <em>real course</em></h1>
+  <p class="hero-sub">Paste a YouTube playlist URL. Get a polished HTML course page you can open, share, or host anywhere — in seconds.</p>
+</div>
+
+<div class="generator">
+  <div class="card">
+
+    <div class="field">
+      <label>YouTube Playlist URL</label>
+      <div class="input-wrap">
+        <input type="text" id="playlist-url" placeholder="https://www.youtube.com/playlist?list=PLxxxxxx" autocomplete="off" spellcheck="false">
+        <span class="input-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0">
+        <label>YouTube API Key</label>
+        <div class="input-wrap">
+          <input type="password" id="api-key" placeholder="AIzaSy..." autocomplete="off">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Course Title (optional)</label>
+        <div class="input-wrap">
+          <input type="text" id="course-title" placeholder="Auto-detect from playlist">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">theme</div>
+
+    <div class="options-grid">
+      <button class="option-btn active" data-theme="dark" onclick="selectTheme(this)">
+        <span class="opt-icon">🌙</span>Dark
+      </button>
+      <button class="option-btn" data-theme="light" onclick="selectTheme(this)">
+        <span class="opt-icon">☀️</span>Light
+      </button>
+      <button class="option-btn" data-theme="minimal" onclick="selectTheme(this)">
+        <span class="opt-icon">◻</span>Minimal
+      </button>
+    </div>
+
+    <button class="generate-btn" id="gen-btn" onclick="generate()">
+      <span>Generate course page</span>
+      <span class="btn-icon">→</span>
+    </button>
+
+    <div id="status-area"></div>
+    <div class="error-box" id="error-box"></div>
+    <div id="result-area">
+      <div class="result-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Course page ready
+      </div>
+      <div class="result-subtitle" id="result-subtitle">0 lessons · 0MB</div>
+      <div class="result-actions">
+        <button class="download-btn" onclick="downloadCourse()">⬇ Download HTML</button>
+        <button class="preview-btn" onclick="previewCourse()">Preview in tab</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="info-strip">
+    <span class="info-pill">✓ No backend needed</span>
+    <span class="info-pill">✓ Single HTML file output</span>
+    <span class="info-pill">✓ YouTube iframe embed</span>
+    <span class="info-pill">✓ Progress tracking</span>
+    <span class="info-pill">✓ Free API (500 req/day)</span>
+  </div>
+</div>
+
+<div class="how">
+  <div class="section-label">How it works</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01 / FETCH</div>
+      <div class="step-title">Pulls playlist data</div>
+      <div class="step-desc">Calls YouTube Data API v3 to fetch all video titles, IDs, thumbnails and descriptions.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02 / BUILD</div>
+      <div class="step-title">Generates the page</div>
+      <div class="step-desc">Assembles a full HTML+CSS course layout with sidebar, player, and lesson list — all self-contained.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03 / EXPORT</div>
+      <div class="step-title">Download & share</div>
+      <div class="step-desc">Save the .html file. Open it in any browser. No hosting, no server, no dependencies needed.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedTheme = 'dark';
+let generatedHTML = '';
+
+function selectTheme(btn) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTheme = btn.dataset.theme;
+}
+
+function addStatus(msg, state = 'spin') {
+  const area = document.getElementById('status-area');
+  area.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'status-line';
+  const dot = document.createElement('div');
+  dot.className = `status-dot ${state}`;
+  line.appendChild(dot);
+  line.appendChild(document.createTextNode(msg));
+  area.appendChild(line);
+  return dot;
+}
+
+function setStatus(dot, state) {
+  dot.className = `status-dot ${state}`;
+}
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = '⚠ ' + msg;
+  box.style.display = 'block';
+}
+
+function extractPlaylistId(url) {
+  try {
+    const u = new URL(url.trim());
+    return u.searchParams.get('list');
+  } catch {
+    const m = url.match(/[?&]list=([^&]+)/);
+    return m ? m[1] : null;
+  }
+}
+
+async function fetchAllVideos(playlistId, apiKey) {
+  const videos = [];
+  let pageToken = '';
+  let playlistTitle = '';
+
+  do {
+    const pageParam = pageToken ? `&pageToken=${pageToken}` : '';
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}${pageParam}&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error.message);
+
+    if (!playlistTitle && data.items?.length) {
+      playlistTitle = data.items[0].snippet.channelTitle || 'Course';
+    }
+
+    for (const item of (data.items || [])) {
+      const s = item.snippet;
+      if (s.resourceId?.videoId && s.title !== 'Deleted video' && s.title !== 'Private video') {
+        videos.push({
+          videoId: s.resourceId.videoId,
+          title: s.title,
+          description: (s.description || '').slice(0, 200),
+          thumbnail: s.thumbnails?.medium?.url || s.thumbnails?.default?.url || '',
+          position: s.position
+        });
+      }
+    }
+
+    pageToken = data.nextPageToken || '';
+  } while (pageToken);
+
+  return { videos, playlistTitle };
+}
+
+async function fetchPlaylistTitle(playlistId, apiKey) {
+  const url = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${apiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.items?.[0]?.snippet?.title || '';
+}
+
+function buildCourseHTML(videos, courseTitle, theme) {
+  const themes = {
+    dark: {
+      bg: '#0f0f0f', sidebar: '#161616', surface: '#1e1e1e',
+      border: '#2a2a2a', text: '#e8e8e8', muted: '#888',
+      accent: '#3b82f6', accentHover: '#2563eb', active: '#1d3a6e',
+      activeText: '#93c5fd', playerBg: '#000', headerBg: '#0f0f0f',
+      scrollbar: '#2a2a2a', badge: '#1e3a5f', badgeText: '#60a5fa',
+      checkBg: '#14532d', checkText: '#4ade80', fontColor: '#e8e8e8'
+    },
+    light: {
+      bg: '#f5f5f5', sidebar: '#ffffff', surface: '#ffffff',
+      border: '#e5e7eb', text: '#111827', muted: '#6b7280',
+      accent: '#2563eb', accentHover: '#1d4ed8', active: '#dbeafe',
+      activeText: '#1e40af', playerBg: '#000', headerBg: '#ffffff',
+      scrollbar: '#d1d5db', badge: '#dbeafe', badgeText: '#1e40af',
+      checkBg: '#dcfce7', checkText: '#15803d', fontColor: '#111827'
+    },
+    minimal: {
+      bg: '#fafafa', sidebar: '#fafafa', surface: '#ffffff',
+      border: '#e8e8e8', text: '#1a1a1a', muted: '#9ca3af',
+      accent: '#1a1a1a', accentHover: '#333', active: '#f3f4f6',
+      activeText: '#111827', playerBg: '#000', headerBg: '#fafafa',
+      scrollbar: '#e8e8e8', badge: '#f3f4f6', badgeText: '#374151',
+      checkBg: '#f3f4f6', checkText: '#15803d', fontColor: '#1a1a1a'
+    }
+  };
+
+  const t = themes[theme] || themes.dark;
+  const escapedTitle = courseTitle.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const videoCount = videos.length;
+
+  const lessonItems = videos.map((v, i) => `
+    <div class="lesson-item" id="item-${i}" onclick="loadLesson(${i})">
+      <div class="lesson-num">${String(i + 1).padStart(2, '0')}</div>
+      <div class="lesson-thumb">
+        <img src="${v.thumbnail}" alt="" loading="lazy" onerror="this.style.display='none'">
+        <div class="play-overlay">▶</div>
+      </div>
+      <div class="lesson-info">
+        <div class="lesson-title">${v.title.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        <div class="lesson-meta">YouTube</div>
+      </div>
+      <div class="lesson-check" id="check-${i}">✓</div>
+    </div>`).join('');
+
+  const videoData = JSON.stringify(videos.map(v => ({ videoId: v.videoId, title: v.title })));
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapedTitle}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: ${t.bg}; --sidebar: ${t.sidebar}; --surface: ${t.surface};
+    --border: ${t.border}; --text: ${t.text}; --muted: ${t.muted};
+    --accent: ${t.accent}; --accent-hover: ${t.accentHover}; --active: ${t.active};
+    --active-text: ${t.activeText}; --player-bg: ${t.playerBg};
+    --header-bg: ${t.headerBg}; --scrollbar: ${t.scrollbar};
+    --badge: ${t.badge}; --badge-text: ${t.badgeText};
+    --check-bg: ${t.checkBg}; --check-text: ${t.checkText};
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* Header */
+  .course-header {
+    background: var(--header-bg); border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 56px; display: flex; align-items: center;
+    justify-content: space-between; flex-shrink: 0; gap: 16px;
+  }
+  .course-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .progress-bar-bg { width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; width: 0%; }
+  .progress-text { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .reset-btn { font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Layout */
+  .course-body { display: flex; flex: 1; overflow: hidden; }
+
+  /* Player */
+  .player-pane {
+    flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden;
+  }
+  .player-wrap { position: relative; width: 100%; padding-top: 56.25%; background: var(--player-bg); flex-shrink: 0; }
+  .player-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .player-meta { padding: 20px 24px; overflow-y: auto; }
+  .now-playing-label { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .now-playing-title { font-size: 18px; font-weight: 600; line-height: 1.4; }
+  .nav-btns { display: flex; gap: 8px; margin-top: 16px; }
+  .nav-btn {
+    padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px;
+    background: none; color: var(--text); font-size: 13px; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .mark-done-btn {
+    padding: 8px 18px; border-radius: 8px; border: none;
+    background: var(--accent); color: #fff; font-size: 13px; font-family: inherit;
+    font-weight: 600; cursor: pointer; transition: background 0.15s; margin-left: auto;
+  }
+  .mark-done-btn:hover { background: var(--accent-hover); }
+  .mark-done-btn.done { background: var(--check-bg); color: var(--check-text); border: 1px solid transparent; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 340px; flex-shrink: 0; background: var(--sidebar);
+    border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-head {
+    padding: 16px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .sidebar-head-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sidebar-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .lesson-count { font-size: 12px; color: var(--muted); }
+  .sidebar-search { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+  .sidebar-search:focus { border-color: var(--accent); }
+  .sidebar-search::placeholder { color: var(--muted); }
+  .lesson-list { overflow-y: auto; flex: 1; padding: 8px; }
+  .lesson-list::-webkit-scrollbar { width: 4px; }
+  .lesson-list::-webkit-scrollbar-track { background: transparent; }
+  .lesson-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 2px; }
+
+  /* Lesson items */
+  .lesson-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 8px;
+    border-radius: 8px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px;
+  }
+  .lesson-item:hover { background: var(--active); }
+  .lesson-item.active { background: var(--active); }
+  .lesson-num { font-size: 11px; color: var(--muted); width: 20px; text-align: center; flex-shrink: 0; font-weight: 500; }
+  .lesson-thumb {
+    width: 60px; height: 34px; border-radius: 4px; overflow: hidden;
+    background: var(--border); flex-shrink: 0; position: relative;
+  }
+  .lesson-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .play-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #fff; opacity: 0; transition: opacity 0.15s;
+  }
+  .lesson-item:hover .play-overlay { opacity: 1; }
+  .lesson-item.active .lesson-num { color: var(--active-text); font-weight: 600; }
+  .lesson-info { flex: 1; min-width: 0; }
+  .lesson-title { font-size: 12px; font-weight: 500; line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .lesson-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .lesson-check {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--check-bg);
+    color: var(--check-text); font-size: 9px; display: none; align-items: center;
+    justify-content: center; flex-shrink: 0; font-weight: 700;
+  }
+  .lesson-check.visible { display: flex; }
+  .lesson-item.hidden { display: none; }
+
+  @media (max-width: 768px) {
+    body { overflow: auto; }
+    .course-body { flex-direction: column; }
+    .sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); max-height: 50vh; }
+    .course-header .progress-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="course-header">
+  <div class="course-title">${escapedTitle}</div>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="prog-fill"></div>
+    </div>
+    <span class="progress-text" id="prog-text">0 / ${videoCount} done</span>
+    <button class="reset-btn" onclick="resetProgress()">Reset</button>
+  </div>
+</header>
+
+<div class="course-body">
+  <div class="player-pane">
+    <div class="player-wrap">
+      <iframe id="yt-player" src="https://www.youtube.com/embed/${videos[0]?.videoId}?rel=0&modestbranding=1" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+    </div>
+    <div class="player-meta">
+      <div class="now-playing-label">Now playing</div>
+      <div class="now-playing-title" id="current-title">${(videos[0]?.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+      <div class="nav-btns">
+        <button class="nav-btn" id="prev-btn" onclick="prevLesson()" disabled>← Previous</button>
+        <button class="nav-btn" id="next-btn" onclick="nextLesson()">Next →</button>
+        <button class="mark-done-btn" id="done-btn" onclick="toggleDone()">Mark as done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-head-top">
+        <span class="sidebar-label">Lessons</span>
+        <span class="lesson-count">${videoCount} videos</span>
+      </div>
+      <input class="sidebar-search" type="text" placeholder="Search lessons…" oninput="filterLessons(this.value)">
+    </div>
+    <div class="lesson-list">
+      ${lessonItems}
+    </div>
+  </div>
+</div>
+
+<script>
+  const VIDEOS = ${videoData};
+  const STORAGE_KEY = 'ytcourse_${playlistId}';
+  let current = 0;
+  let completed = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+
+  function init() {
+    updateActive(0);
+    updateProgress();
+    completed.forEach(i => {
+      const c = document.getElementById('check-'+i);
+      if (c) c.classList.add('visible');
+    });
+  }
+
+  function loadLesson(i) {
+    current = i;
+    const v = VIDEOS[i];
+    document.getElementById('yt-player').src = 'https://www.youtube.com/embed/' + v.videoId + '?rel=0&modestbranding=1&autoplay=1';
+    document.getElementById('current-title').textContent = v.title;
+    updateActive(i);
+    document.getElementById('prev-btn').disabled = i === 0;
+    document.getElementById('next-btn').disabled = i === VIDEOS.length - 1;
+    const doneBtn = document.getElementById('done-btn');
+    doneBtn.textContent = completed.has(i) ? '✓ Completed' : 'Mark as done';
+    doneBtn.className = 'mark-done-btn' + (completed.has(i) ? ' done' : '');
+    const el = document.getElementById('item-'+i);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function updateActive(i) {
+    document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+    const el = document.getElementById('item-'+i);
+    if (el) el.classList.add('active');
+  }
+
+  function prevLesson() { if (current > 0) loadLesson(current - 1); }
+  function nextLesson() { if (current < VIDEOS.length - 1) loadLesson(current + 1); }
+
+  function toggleDone() {
+    if (completed.has(current)) {
+      completed.delete(current);
+    } else {
+      completed.add(current);
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
+    loadLesson(current);
+    updateProgress();
+    const check = document.getElementById('check-'+current);
+    if (check) check.classList.toggle('visible', completed.has(current));
+  }
+
+  function updateProgress() {
+    const pct = VIDEOS.length ? (completed.size / VIDEOS.length * 100).toFixed(0) : 0;
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-text').textContent = completed.size + ' / ' + VIDEOS.length + ' done';
+  }
+
+  function resetProgress() {
+    if (!confirm('Reset all progress?')) return;
+    completed.clear();
+    localStorage.removeItem(STORAGE_KEY);
+    document.querySelectorAll('.lesson-check').forEach(c => c.classList.remove('visible'));
+    updateProgress();
+    loadLesson(current);
+  }
+
+  function filterLessons(q) {
+    const query = q.toLowerCase();
+    VIDEOS.forEach((v, i) => {
+      const el = document.getElementById('item-'+i);
+      if (el) el.classList.toggle('hidden', !v.title.toLowerCase().includes(query));
+    });
+  }
+
+  init();
+<\/script>
+</body>
+</html>`;
+}
+
+async function generate() {
+  const url = document.getElementById('playlist-url').value.trim();
+  const apiKey = document.getElementById('api-key').value.trim();
+  const customTitle = document.getElementById('course-title').value.trim();
+
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('result-area').style.display = 'none';
+  document.getElementById('status-area').innerHTML = '';
+  document.getElementById('status-area').style.display = 'none';
+
+  if (!url) { showError('Please enter a YouTube playlist URL.'); return; }
+  if (!apiKey) { showError('Please enter your YouTube Data API v3 key. Get one free at console.cloud.google.com'); return; }
+
+  const playlistId = extractPlaylistId(url);
+  if (!playlistId) { showError('Could not find a playlist ID in that URL. Make sure the URL contains ?list=...'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+
+  let dot1 = addStatus('Connecting to YouTube API…');
+  let dot2, dot3;
+
+  try {
+    let { videos, playlistTitle } = await fetchAllVideos(playlistId, apiKey);
+    setStatus(dot1, 'done');
+
+    try {
+      const pt = await fetchPlaylistTitle(playlistId, apiKey);
+      if (pt) playlistTitle = pt;
+    } catch {}
+
+    const finalTitle = customTitle || playlistTitle || 'My Course';
+
+    dot2 = addStatus(`Fetched ${videos.length} videos — building course page…`);
+    setStatus(dot2, 'done');
+
+    dot3 = addStatus('Generating HTML + CSS…');
+    await new Promise(r => setTimeout(r, 60));
+
+    generatedHTML = buildCourseHTML(videos, finalTitle, selectedTheme);
+    setStatus(dot3, 'done');
+
+    const kb = Math.round(new Blob([generatedHTML]).size / 1024);
+    document.getElementById('result-subtitle').textContent = `${videos.length} lessons · ~${kb}KB`;
+    document.getElementById('result-area').style.display = 'block';
+
+  } catch (err) {
+    if (dot1) setStatus(dot1, 'err');
+    if (dot2) setStatus(dot2, 'err');
+    if (dot3) setStatus(dot3, 'err');
+    showError(err.message || 'Something went wrong. Check your API key and playlist URL.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function downloadCourse() {
+  if (!generatedHTML) return;
+  const blob = new Blob([generatedHTML], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'course.html';
+  a.click();
+}
+
+function previewCourse() {
+  if (!generatedHTML) return;
+  const blob = new Blob([generatedHTML], { type: 'text/html' });
+  window.open(URL.createObjectURL(blob), '_blank');
+}
+
+document.getElementById('playlist-url').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generate();
+});
+</script>
+</body>
+</html>
