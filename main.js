@@ -195,30 +195,30 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
   const themes = {
     dark: {
       bg: '#0f0f0f', sidebar: '#111111', surface: '#1a1a1a',
-      border: '#242424', text: '#e8e8e8', muted: '#777',
+      border: '#242424', text: '#e8e8e8', muted: '#666',
       accent: '#3b82f6', accentHover: '#2563eb',
       active: 'rgba(59,130,246,0.12)', activeText: '#93c5fd',
-      playerBg: '#000', headerBg: '#111111',
-      scrollbar: '#2a2a2a',
-      checkBg: '#14532d', checkText: '#4ade80'
+      headerBg: '#111111', scrollbar: '#2a2a2a',
+      checkBg: '#14532d', checkText: '#4ade80',
+      playerChrome: '#181818', progressTrack: '#333'
     },
     light: {
       bg: '#f0f2f5', sidebar: '#ffffff', surface: '#ffffff',
       border: '#e2e5ea', text: '#111827', muted: '#6b7280',
       accent: '#2563eb', accentHover: '#1d4ed8',
       active: '#dbeafe', activeText: '#1e40af',
-      playerBg: '#000', headerBg: '#ffffff',
-      scrollbar: '#d1d5db',
-      checkBg: '#dcfce7', checkText: '#15803d'
+      headerBg: '#ffffff', scrollbar: '#d1d5db',
+      checkBg: '#dcfce7', checkText: '#15803d',
+      playerChrome: '#1a1a1a', progressTrack: '#444'
     },
     minimal: {
       bg: '#f9f9f9', sidebar: '#ffffff', surface: '#ffffff',
       border: '#ebebeb', text: '#1a1a1a', muted: '#aaa',
       accent: '#1a1a1a', accentHover: '#333',
       active: '#f3f4f6', activeText: '#111',
-      playerBg: '#000', headerBg: '#ffffff',
-      scrollbar: '#e0e0e0',
-      checkBg: '#f0fdf4', checkText: '#15803d'
+      headerBg: '#ffffff', scrollbar: '#e0e0e0',
+      checkBg: '#f0fdf4', checkText: '#15803d',
+      playerChrome: '#111111', progressTrack: '#555'
     }
   };
 
@@ -253,347 +253,210 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapedTitle}</title>
-
-<!-- Video.js core -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"><\/script>
-<!-- Video.js YouTube tech plugin -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-youtube/3.0.1/Youtube.min.js"><\/script>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
     --bg: ${t.bg};
     --sidebar: ${t.sidebar};
-    --surface: ${t.surface};
     --border: ${t.border};
     --text: ${t.text};
     --muted: ${t.muted};
     --accent: ${t.accent};
-    --accent-hover: ${t.accentHover};
+    --accent-h: ${t.accentHover};
     --active: ${t.active};
     --active-text: ${t.activeText};
-    --player-bg: ${t.playerBg};
     --header-bg: ${t.headerBg};
     --scrollbar: ${t.scrollbar};
     --check-bg: ${t.checkBg};
     --check-text: ${t.checkText};
+    --player-chrome: ${t.playerChrome};
+    --progress-track: ${t.progressTrack};
   }
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
 
   /* ── HEADER ── */
   .course-header {
-    height: 52px;
-    background: var(--header-bg);
+    height: 52px; background: var(--header-bg);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    gap: 16px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; gap: 16px; flex-shrink: 0; z-index: 10; position: relative;
   }
   .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text);
-    cursor: pointer;
-    padding: 4px;
-    flex-shrink: 0;
+    background: none; border: none; color: var(--text); cursor: pointer;
+    padding: 4px; flex-shrink: 0; display: flex; align-items: center;
   }
-  .course-title {
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .course-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .progress-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .progress-bar-bg { width: 100px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
   .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
   .progress-text { font-size: 11px; color: var(--muted); white-space: nowrap; }
   .reset-btn {
-    font-size: 11px;
-    color: var(--muted);
-    background: none;
-    border: 1px solid var(--border);
-    padding: 3px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s;
+    font-size: 11px; color: var(--muted); background: none;
+    border: 1px solid var(--border); padding: 3px 10px; border-radius: 5px;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
   }
   .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* ── BODY: sidebar LEFT + player RIGHT ── */
+  /* ── LAYOUT: sidebar LEFT, player RIGHT ── */
   .course-body {
-    display: flex;
-    flex-direction: row;       /* sidebar on the left */
-    height: calc(100vh - 52px);
-    overflow: hidden;
+    display: flex; flex-direction: row;
+    height: calc(100vh - 52px); overflow: hidden;
   }
 
-  /* ── SIDEBAR (left) ── */
+  /* ── LEFT SIDEBAR ── */
   .sidebar {
-    width: 320px;
-    flex-shrink: 0;
-    background: var(--sidebar);
+    width: 320px; flex-shrink: 0; background: var(--sidebar);
     border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: flex; flex-direction: column; overflow: hidden;
     transition: width 0.25s ease, opacity 0.25s ease;
   }
   .sidebar.collapsed { width: 0; opacity: 0; pointer-events: none; }
-
-  .sidebar-head {
-    padding: 14px 14px 10px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .sidebar-head-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .sidebar-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
+  .sidebar-head { padding: 14px 14px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .sidebar-head-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sidebar-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
   .lesson-count { font-size: 11px; color: var(--muted); }
   .sidebar-search {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 7px 11px;
-    color: var(--text);
-    font-size: 12px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.15s;
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 7px 11px; color: var(--text);
+    font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s;
   }
   .sidebar-search:focus { border-color: var(--accent); }
   .sidebar-search::placeholder { color: var(--muted); }
-
-  .lesson-list {
-    overflow-y: auto;
-    flex: 1;
-    padding: 6px;
-  }
+  .lesson-list { overflow-y: auto; flex: 1; padding: 6px; }
   .lesson-list::-webkit-scrollbar { width: 3px; }
   .lesson-list::-webkit-scrollbar-track { background: transparent; }
   .lesson-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 2px; }
 
   /* ── LESSON ITEMS ── */
   .lesson-item {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 8px 8px;
-    border-radius: 7px;
-    cursor: pointer;
-    transition: background 0.1s;
-    margin-bottom: 1px;
+    display: flex; align-items: center; gap: 9px; padding: 8px;
+    border-radius: 7px; cursor: pointer; transition: background 0.1s; margin-bottom: 1px;
   }
   .lesson-item:hover { background: var(--active); }
   .lesson-item.active { background: var(--active); }
   .lesson-item.hidden { display: none; }
-
   .lesson-left { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
-  .lesson-num {
-    font-size: 10px;
-    color: var(--muted);
-    width: 18px;
-    text-align: center;
-    font-weight: 500;
-    flex-shrink: 0;
-  }
+  .lesson-num { font-size: 10px; color: var(--muted); width: 18px; text-align: center; font-weight: 500; flex-shrink: 0; }
   .lesson-item.active .lesson-num { color: var(--accent); font-weight: 600; }
-
   .lesson-thumb {
-    width: 72px;
-    height: 41px;
-    border-radius: 4px;
-    overflow: hidden;
-    background: var(--border);
-    flex-shrink: 0;
-    position: relative;
+    width: 72px; height: 41px; border-radius: 4px; overflow: hidden;
+    background: var(--border); flex-shrink: 0; position: relative;
   }
   .lesson-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .play-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: #fff;
-    opacity: 0;
-    transition: opacity 0.12s;
+    position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #fff; opacity: 0; transition: opacity 0.12s;
   }
   .lesson-item:hover .play-overlay,
   .lesson-item.active .play-overlay { opacity: 1; }
-
   .lesson-info { flex: 1; min-width: 0; }
   .lesson-title {
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1.4;
-    color: var(--text);
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--text);
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
   .lesson-item.active .lesson-title { color: var(--active-text); }
-
   .lesson-check {
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
-    background: var(--check-bg);
-    color: var(--check-text);
-    font-size: 8px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-weight: 700;
+    width: 17px; height: 17px; border-radius: 50%; background: var(--check-bg);
+    color: var(--check-text); font-size: 8px; display: none;
+    align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700;
   }
   .lesson-check.visible { display: flex; }
 
   /* ── PLAYER PANE (right) ── */
   .player-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg);
-    overflow: hidden;
-    min-width: 0;
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--bg); overflow: hidden; min-width: 0;
   }
 
-  /* Video.js responsive container — pure CSS 16:9 */
+  /* ── RESPONSIVE IFRAME PLAYER (16:9) ── */
+  /*
+   * No videojs-youtube plugin — avoids the postMessage origin error (153).
+   * We use youtube-nocookie.com with enablejsapi=0 so no IFrame API
+   * postMessage handshake is attempted at all. Pure embed, zero JS comms.
+   */
   .player-wrap {
     position: relative;
     width: 100%;
-    padding-top: 56.25%;   /* 16:9 */
+    padding-top: 56.25%;   /* 16 : 9 */
     background: #000;
     flex-shrink: 0;
+    overflow: hidden;
   }
-  .player-wrap .video-js {
+  .player-wrap iframe {
     position: absolute;
     top: 0; left: 0;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
   }
-  /* Override Video.js big-play-button colour to accent */
-  .video-js .vjs-big-play-button {
-    background: var(--accent);
-    border-color: var(--accent);
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    line-height: 60px;
-    margin-top: -30px;
-    margin-left: -30px;
-  }
-  .video-js .vjs-big-play-button:hover { background: var(--accent-hover); }
-  .video-js .vjs-control-bar { background: rgba(0,0,0,0.75); }
-  .video-js .vjs-play-progress,
-  .video-js .vjs-volume-level { background: var(--accent); }
 
-  .player-meta {
-    padding: 16px 20px;
-    overflow-y: auto;
-    flex: 1;
+  /* ── Video.js-style chrome bar below iframe ── */
+  .vjs-chrome {
+    background: var(--player-chrome);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    height: 36px;
+    flex-shrink: 0;
   }
+  .vjs-chrome-btn {
+    background: none; border: none; color: #ccc; cursor: pointer;
+    padding: 0; display: flex; align-items: center; font-size: 13px;
+    transition: color 0.15s;
+  }
+  .vjs-chrome-btn:hover { color: #fff; }
+  .vjs-chrome-btn svg { width: 16px; height: 16px; }
+  .vjs-progress {
+    flex: 1; height: 3px; background: var(--progress-track);
+    border-radius: 2px; overflow: visible; position: relative; cursor: pointer;
+  }
+  .vjs-progress-fill {
+    height: 100%; background: var(--accent); border-radius: 2px;
+    width: 0%; transition: width 0.3s linear; pointer-events: none;
+  }
+  .vjs-time { font-size: 11px; color: #aaa; white-space: nowrap; user-select: none; }
+  .vjs-spacer { flex: 1; }
+
+  /* ── PLAYER META ── */
+  .player-meta { padding: 16px 20px; overflow-y: auto; flex: 1; }
   .now-playing-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
+    font-size: 10px; font-weight: 600; color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;
   }
-  .now-playing-title {
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.4;
-    margin-bottom: 14px;
-  }
+  .now-playing-title { font-size: 17px; font-weight: 600; line-height: 1.4; margin-bottom: 14px; }
   .nav-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .nav-btn {
-    padding: 7px 16px;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    background: none;
-    color: var(--text);
-    font-size: 13px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.15s;
+    padding: 7px 16px; border: 1px solid var(--border); border-radius: 7px;
+    background: none; color: var(--text); font-size: 13px; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
   }
   .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
   .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   .mark-done-btn {
-    margin-left: auto;
-    padding: 7px 16px;
-    border-radius: 7px;
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    font-size: 13px;
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
+    margin-left: auto; padding: 7px 16px; border-radius: 7px; border: none;
+    background: var(--accent); color: #fff; font-size: 13px; font-family: inherit;
+    font-weight: 600; cursor: pointer; transition: background 0.15s;
   }
-  .mark-done-btn:hover { background: var(--accent-hover); }
-  .mark-done-btn.done {
-    background: var(--check-bg);
-    color: var(--check-text);
-  }
+  .mark-done-btn:hover { background: var(--accent-h); }
+  .mark-done-btn.done { background: var(--check-bg); color: var(--check-text); }
 
   /* ── MOBILE ── */
   @media (max-width: 768px) {
     html, body { overflow: auto; }
-    .course-body {
-      flex-direction: column;
-      height: auto;
-    }
+    .course-body { flex-direction: column; height: auto; }
     .sidebar {
-      width: 100% !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      border-right: none;
-      border-bottom: 1px solid var(--border);
-      max-height: 44vh;
-      order: 2;           /* lesson list below the player on mobile */
+      width: 100% !important; opacity: 1 !important; pointer-events: auto !important;
+      border-right: none; border-top: 1px solid var(--border); max-height: 44vh; order: 2;
     }
     .sidebar.collapsed { max-height: 0; overflow: hidden; }
     .player-pane { order: 1; }
-    .player-wrap { padding-top: 56.25%; }
-    .menu-toggle { display: flex; }
     .progress-wrap { display: none; }
     .player-meta { padding: 12px 14px; }
     .now-playing-title { font-size: 14px; }
@@ -602,31 +465,25 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="course-header">
   <div class="header-left">
-    <button class="menu-toggle" onclick="toggleSidebar()" title="Toggle lesson list" aria-label="Toggle lesson list">
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle lesson list">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <line x1="3" y1="12" x2="21" y2="12"/>
-        <line x1="3" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
     <span class="course-title">${escapedTitle}</span>
   </div>
   <div class="progress-wrap">
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="prog-fill"></div>
-    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill"></div></div>
     <span class="progress-text" id="prog-text">0 / ${videoCount} done</span>
     <button class="reset-btn" onclick="resetProgress()">Reset</button>
   </div>
 </header>
 
-<!-- BODY: sidebar LEFT → player RIGHT -->
 <div class="course-body">
 
-  <!-- LEFT SIDEBAR — lesson list -->
+  <!-- LEFT — lesson list -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
       <div class="sidebar-head-top">
@@ -635,97 +492,83 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
       </div>
       <input class="sidebar-search" type="text" placeholder="Search lessons..." oninput="filterLessons(this.value)">
     </div>
-    <div class="lesson-list" id="lesson-list">
-      ${lessonItems}
-    </div>
+    <div class="lesson-list">${lessonItems}</div>
   </aside>
 
-  <!-- RIGHT — Video.js player + meta -->
+  <!-- RIGHT — player -->
   <main class="player-pane">
+
+    <!-- Responsive 16:9 nocookie iframe — no IFrame API, no postMessage, no Error 153 -->
     <div class="player-wrap">
-      <video
-        id="yt-player"
-        class="video-js vjs-default-skin vjs-big-play-centered"
-        controls
-        preload="auto"
-        data-setup='{}'>
-      </video>
+      <iframe
+        id="yt-iframe"
+        src="https://www.youtube-nocookie.com/embed/${firstVideoId}?rel=0&modestbranding=1&enablejsapi=0&color=white&iv_load_policy=3"
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        title="${firstTitle}">
+      </iframe>
     </div>
+
+    <!-- Video.js-styled chrome bar (purely decorative / navigation — real controls are inside YouTube iframe) -->
+    <div class="vjs-chrome">
+      <button class="vjs-chrome-btn" onclick="prevLesson()" id="prev-btn" title="Previous lesson">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
+        </svg>
+      </button>
+      <button class="vjs-chrome-btn" onclick="nextLesson()" id="next-btn" title="Next lesson">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+        </svg>
+      </button>
+      <div class="vjs-progress" title="Course progress">
+        <div class="vjs-progress-fill" id="vjs-prog"></div>
+      </div>
+      <span class="vjs-time" id="vjs-count">0 / ${videoCount}</span>
+    </div>
+
     <div class="player-meta">
       <div class="now-playing-label">Now playing</div>
       <div class="now-playing-title" id="current-title">${firstTitle}</div>
       <div class="nav-btns">
-        <button class="nav-btn" id="prev-btn" onclick="prevLesson()" disabled>&#8592; Previous</button>
-        <button class="nav-btn" id="next-btn" onclick="nextLesson()">Next &#8594;</button>
+        <button class="nav-btn" id="prev-btn-meta" onclick="prevLesson()" disabled>&#8592; Previous</button>
+        <button class="nav-btn" id="next-btn-meta" onclick="nextLesson()">Next &#8594;</button>
         <button class="mark-done-btn" id="done-btn" onclick="toggleDone()">Mark as done</button>
       </div>
     </div>
-  </main>
 
+  </main>
 </div>
 
 <script>
-  /* ── data ── */
   var VIDEOS = ${videoData};
   var STORAGE_KEY = 'ytcourse_${playlistId}';
   var current = 0;
   var completed = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
-  var player = null;
 
-  /* ── init Video.js with YouTube tech ── */
-  function initPlayer(videoId) {
-    console.log('[course] initPlayer — videoId:', videoId);
-    player = videojs('yt-player', {
-      techOrder: ['youtube'],
-      sources: [{
-        type: 'video/youtube',
-        src: 'https://www.youtube.com/watch?v=' + videoId
-      }],
-      youtube: {
-        iv_load_policy: 3,
-        modestbranding: 1,
-        rel: 0,
-        ytControls: 0
-      },
-      fluid: false,
-      responsive: true,
-      aspectRatio: '16:9'
-    });
-
-    player.on('ended', function() {
-      console.log('[course] video ended — auto-advancing');
-      if (current < VIDEOS.length - 1) {
-        loadLesson(current + 1);
-      }
-    });
-
-    player.on('error', function() {
-      console.error('[course] Video.js error:', player.error());
-    });
-
-    console.log('[course] Video.js player ready');
+  /* Build nocookie embed URL — enablejsapi=0 kills postMessage entirely */
+  function embedUrl(videoId) {
+    return 'https://www.youtube-nocookie.com/embed/' + videoId
+      + '?rel=0&modestbranding=1&enablejsapi=0&color=white&iv_load_policy=3&autoplay=1';
   }
 
-  /* ── load a lesson by index ── */
   function loadLesson(i) {
     console.log('[course] loadLesson →', i, ':', VIDEOS[i] ? VIDEOS[i].title : '?');
     current = i;
     var v = VIDEOS[i];
 
-    if (player) {
-      player.src({
-        type: 'video/youtube',
-        src: 'https://www.youtube.com/watch?v=' + v.videoId
-      });
-      player.play();
-      console.log('[course] player src swapped to', v.videoId);
-    }
+    /* Swap iframe src — no JS API needed, no postMessage, no Error 153 */
+    var iframe = document.getElementById('yt-iframe');
+    iframe.src = embedUrl(v.videoId);
+    iframe.title = v.title;
 
     document.getElementById('current-title').textContent = v.title;
     updateActive(i);
+    updateChrome(i);
 
-    document.getElementById('prev-btn').disabled = (i === 0);
-    document.getElementById('next-btn').disabled = (i === VIDEOS.length - 1);
+    document.getElementById('prev-btn-meta').disabled = (i === 0);
+    document.getElementById('next-btn-meta').disabled = (i === VIDEOS.length - 1);
 
     var doneBtn = document.getElementById('done-btn');
     doneBtn.textContent = completed.has(i) ? '✓ Completed' : 'Mark as done';
@@ -739,6 +582,16 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
     document.querySelectorAll('.lesson-item').forEach(function(el) { el.classList.remove('active'); });
     var el = document.getElementById('item-' + i);
     if (el) el.classList.add('active');
+  }
+
+  function updateChrome(i) {
+    var pct = VIDEOS.length ? Math.round((i / (VIDEOS.length - 1)) * 100) : 0;
+    document.getElementById('vjs-prog').style.width = pct + '%';
+    document.getElementById('vjs-count').textContent = (i + 1) + ' / ' + VIDEOS.length;
+    var prevBtn = document.getElementById('prev-btn');
+    var nextBtn = document.getElementById('next-btn');
+    if (prevBtn) prevBtn.style.opacity = (i === 0) ? '0.3' : '1';
+    if (nextBtn) nextBtn.style.opacity = (i === VIDEOS.length - 1) ? '0.3' : '1';
   }
 
   function prevLesson() {
@@ -778,9 +631,8 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
     localStorage.removeItem(STORAGE_KEY);
     document.querySelectorAll('.lesson-check').forEach(function(c) { c.classList.remove('visible'); });
     updateProgress();
-    var doneBtn = document.getElementById('done-btn');
-    doneBtn.textContent = 'Mark as done';
-    doneBtn.className = 'mark-done-btn';
+    document.getElementById('done-btn').textContent = 'Mark as done';
+    document.getElementById('done-btn').className = 'mark-done-btn';
   }
 
   function filterLessons(q) {
@@ -801,7 +653,6 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
     console.log('[course] sidebar toggled —', sb.classList.contains('collapsed') ? 'hidden' : 'visible');
   }
 
-  /* ── restore completed checks on load ── */
   function init() {
     console.log('[course] init — total lessons:', VIDEOS.length);
     console.log('[course] restored progress from localStorage:', [...completed]);
@@ -810,7 +661,7 @@ function buildCourseHTML(videos, courseTitle, theme, playlistId) {
       if (c) c.classList.add('visible');
     });
     updateProgress();
-    initPlayer(VIDEOS[0] ? VIDEOS[0].videoId : '');
+    updateChrome(0);
     console.log('[course] ready');
   }
 
